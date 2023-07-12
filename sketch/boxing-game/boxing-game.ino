@@ -12,7 +12,7 @@
  *  output :  - p10 panel display : SPI
  *            - mini DF Player : Serial3
  *            - led button : 5
- *            - driver or relay for punch actuator / releaser :  6
+ *            - driver or relay for punch RELAY / releaser :  6
  */
 #include <SPI.h>
 #include <DMD2.h>
@@ -24,11 +24,11 @@
 #define DISPLAYS_HIGH 1
 
 #define SENSOR1      2 
-#define SENSOR2      3 
-#define START_BUTTON  4 
+#define SENSOR2      4
+#define START_BUTTON  17 
 #define LED_BUTTON    5 
-#define ACTUATOR      6 
-#define MAXTIME   5000
+#define RELAY      16 
+#define MAXTIME   1000
 #define BELL      2 
 #define COUNTING  3 
 #define CLAP      1 
@@ -39,59 +39,75 @@ DMD_TextBox box(dmd, 0, 0, 32, 16);
 DFRobotDFPlayerMini myDFPlayer;
 
 int score, highscore;
-int st_game=0;
-unsigned long punch_millis, punch_time;
+int st_game=0, st_clear=0;
+unsigned long punch_millis, punch_time, cek_millis,  blip_millis;
 
 void setup() {
   pinMode(SENSOR1,INPUT_PULLUP);
   pinMode(SENSOR2,INPUT_PULLUP);
   pinMode(START_BUTTON,INPUT_PULLUP);
   pinMode(LED_BUTTON,OUTPUT);
-  pinMode(ACTUATOR,OUTPUT);
+  pinMode(RELAY,OUTPUT);
   digitalWrite(SENSOR1, HIGH);
   digitalWrite(SENSOR2, HIGH);
   digitalWrite(START_BUTTON, HIGH);
   digitalWrite(LED_BUTTON, HIGH);
-  digitalWrite(ACTUATOR, HIGH);
+  digitalWrite(RELAY, HIGH);
   Serial3.begin(9600);
+  Serial.begin(9600);
   myDFPlayer.begin(Serial3);
   dmd.setBrightness(50);
   dmd.selectFont(SystemFont5x7);
   dmd.begin();
   EEPROM.get(0, highscore);
-  if(highscore>999 || highscore<1) highscore=0;
+  //if(highscore>999 || highscore<1) {
+    highscore=500;
+    EEPROM.put(0, highscore);
+  //}
+  digitalWrite(RELAY,LOW);
+  delay(1000);
   myDFPlayer.play(BELL);
   display_on();
+  digitalWrite(RELAY,HIGH);
+  Serial.println("Fun-Boxing Start");
 }
 
 void loop() {
-  if(START_BUTTON == LOW && st_game == 0) {
+  if(millis()/1000 != cek_millis) {
+    cek_millis = millis()/1000;
+    Serial.println(st_game);
+  }
+  
+  if(digitalRead(START_BUTTON) == LOW && st_game == 0) {
     delay(50);
-    if(START_BUTTON == LOW) {
+    if(digitalRead(START_BUTTON) == LOW) {
       score=0;
       st_game=1;
+      dmd.clearScreen();
+      dmd.drawString(2, 4, F("READY"));
       delay(50);
     }
   }
   
   if(st_game == 1) {
-    release_punch(); // punch has to be released perfectly sensor2 in LOW state
     myDFPlayer.play(BELL); // start punch sounds
-    display_start();
+    release_punch(); // punch has to be released perfectly sensor2 in LOW state
+    dmd.clearScreen();
+    dmd.drawString(8, 4, F("GO!"));
     st_game=2;
   }
 
-  if(st_game == 2 && SENSOR2 == HIGH) {
+  if(st_game == 2 && digitalRead(SENSOR1) == HIGH) {
     punch_millis = millis();
     st_game = 3;
   }
-  if(st_game == 3 && SENSOR2 == LOW) {
+  if(st_game == 3 && digitalRead(SENSOR1) == LOW) {
     st_game = 2;
   }
   
-  if(st_game == 3 && SENSOR1 == LOW) {
+  if(st_game == 3 && digitalRead(SENSOR2) == LOW) {
     delay(10);
-    if(SENSOR1 == LOW) {
+    if(digitalRead(SENSOR2) == LOW) {
       punch_time = millis() - punch_millis;
       score = MAXTIME - punch_time;
       if(score < 0) score = 0;
@@ -103,6 +119,7 @@ void loop() {
   if(st_game == 4) {
     myDFPlayer.play(COUNTING);
     display_counting();
+    delay(5000);
     if(score>highscore) {
       myDFPlayer.play(CLAP);
       highscore = score;
@@ -112,7 +129,14 @@ void loop() {
       myDFPlayer.play(WOO);
     }
     display_result();
+    delay(3000);
     st_game=0;
   }
-  if(st_game == 0) display_normal();
+  if(st_game == 0) {
+    if(digitalRead(SENSOR2)==HIGH) display_error();
+    else {
+      if(st_clear==0) { dmd.clearScreen(); st_clear=1; }
+      display_normal();
+    }
+  }
 }
