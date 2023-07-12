@@ -64,8 +64,8 @@ void setup() {
     highscore=500;
     EEPROM.put(0, highscore);
   //}
-  digitalWrite(RELAY,LOW);
-  delay(1000);
+  //digitalWrite(RELAY,LOW);
+  delay(500);
   myDFPlayer.play(BELL);
   display_on();
   digitalWrite(RELAY,HIGH);
@@ -110,7 +110,7 @@ void loop() {
     if(digitalRead(SENSOR2) == LOW) {
       punch_time = millis() - punch_millis;
       score = MAXTIME - punch_time;
-      if(score < 0) score = 0;
+      if(score < 10) score = 10;
       score = map(score,0, MAXTIME, 0, 999);
       st_game = 4;
     }
@@ -119,7 +119,6 @@ void loop() {
   if(st_game == 4) {
     myDFPlayer.play(COUNTING);
     display_counting();
-    delay(5000);
     if(score>highscore) {
       myDFPlayer.play(CLAP);
       highscore = score;
@@ -129,7 +128,6 @@ void loop() {
       myDFPlayer.play(WOO);
     }
     display_result();
-    delay(3000);
     st_game=0;
   }
   if(st_game == 0) {
