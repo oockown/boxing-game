@@ -60,24 +60,25 @@ void setup() {
   dmd.selectFont(SystemFont5x7);
   dmd.begin();
   EEPROM.get(0, highscore);
-  //if(highscore>999 || highscore<1) {
-    highscore=500;
+  if(highscore>999 || highscore<1) {
+    highscore=100;
     EEPROM.put(0, highscore);
-  //}
+  }
   //digitalWrite(RELAY,LOW);
-  delay(500);
+  delay(300);
   myDFPlayer.play(BELL);
   display_on();
   digitalWrite(RELAY,HIGH);
   Serial.println("Fun-Boxing Start");
+  if(digitalRead(START_BUTTON) == LOW ) {
+    highscore=100;
+    EEPROM.put(0, highscore);
+  }
+  delay(700);
 }
 
 void loop() {
-  if(millis()/1000 != cek_millis) {
-    cek_millis = millis()/1000;
-    Serial.println(st_game);
-  }
-  
+
   if(digitalRead(START_BUTTON) == LOW && st_game == 0) {
     delay(50);
     if(digitalRead(START_BUTTON) == LOW) {
@@ -110,8 +111,9 @@ void loop() {
     if(digitalRead(SENSOR2) == LOW) {
       punch_time = millis() - punch_millis;
       score = MAXTIME - punch_time;
-      if(score < 10) score = 10;
+      if(score < 0) score = 0;
       score = map(score,0, MAXTIME, 0, 999);
+      if(score < 10) score = 10;
       st_game = 4;
     }
   }

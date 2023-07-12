@@ -29,16 +29,16 @@ void display_counting() {
   dmd.drawString(7, 5, String(score-7)); delay(200);
   dmd.drawString(7, 5, String(score-5)); delay(250);
   dmd.drawString(7, 5, String(score-3)); delay(300);
-  dmd.drawString(7, 5, String(score-2)); delay(300);
-  dmd.drawString(7, 5, String(score-1)); delay(400);
-  dmd.drawString(7, 5, String(score)); delay(500);
+  dmd.drawString(7, 5, String(score-2)); delay(400);
+  dmd.drawString(7, 5, String(score-1)); delay(500);
+  dmd.drawString(7, 5, String(score)); delay(800);
 }
 void display_result() {
   dmd.clearScreen();
   dmd.drawString(7, 0, String(highscore));
   dmd.drawString(7, 8, String(score));
   dmd.drawString(0, 8, ">"); dmd.drawString(27, 8, "<");
-  delay(500);
+  delay(200);
   for(int i=0;i<5;i++) {
   dmd.drawString(7, 0, String(highscore));
   dmd.drawString(7, 8, String("   "));
@@ -49,6 +49,9 @@ void display_result() {
   dmd.drawString(0, 8, ">"); dmd.drawString(27, 8, "<");
   delay(500);
   }
+  delay(1200);
+  dmd.clearScreen();
+  delay(100);
 }
 void display_error(){
   dmd.clearScreen();
