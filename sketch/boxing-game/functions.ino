@@ -11,13 +11,15 @@ void display_normal() {
       if(blip==0) {  dmd.drawString(7, 8, String(highscore));
                      dmd.drawString(0, 8, " "); dmd.drawString(27, 8, " ");
                      dmd.drawString(0, 0, F("      "));     
-                     dmd.drawString(4, 0, F("HIGH"));       }
+                     if(digitalRead(SENSOR2)==HIGH) dmd.drawString(2, 0, F("Err  "));
+                     else  dmd.drawString(5, 0, F("HIGH"));       }
       else if(blip==1) {  dmd.drawString(7, 8, String(highscore));
                           dmd.drawString(0, 8, ">"); dmd.drawString(27, 8, "<");     }
       else if(blip==2) {  dmd.drawString(7, 8, String(highscore));
                      dmd.drawString(0, 8, " "); dmd.drawString(27, 8, " ");
                      dmd.drawString(0, 0, F("      "));   
-                     dmd.drawString(2, 0, F("SCORE"));        }
+                     if(digitalRead(SENSOR2)==HIGH) dmd.drawString(2, 0, F("Err 1"));
+                     else  dmd.drawString(2, 0, F("SCORE"));        }
       else  { dmd.drawString(7, 8, String(highscore));
               dmd.drawString(0, 8, ">"); dmd.drawString(27, 8, "<");        }
   }
@@ -52,11 +54,6 @@ void display_result() {
   delay(1200);
   dmd.clearScreen();
   delay(100);
-}
-void display_error(){
-  dmd.clearScreen();
-  dmd.drawString(6, 4, F("ERR!"));
-  st_clear=0;
 }
 void release_punch() {
   while(digitalRead(SENSOR1)==HIGH) digitalWrite(RELAY,LOW);

@@ -123,20 +123,16 @@ void loop() {
     display_counting();
     if(score>highscore) {
       myDFPlayer.play(CLAP);
-      highscore = score;
-      EEPROM.put(0, highscore);
     }
     else {
       myDFPlayer.play(WOO);
     }
     display_result();
+    if(score>highscore) {
+      highscore = score;
+      EEPROM.put(0, highscore);
+    }
     st_game=0;
   }
-  if(st_game == 0) {
-    if(digitalRead(SENSOR2)==HIGH) display_error();
-    else {
-      if(st_clear==0) { dmd.clearScreen(); st_clear=1; }
-      display_normal();
-    }
-  }
+  if(st_game == 0) display_normal();
 }
